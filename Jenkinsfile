@@ -8,12 +8,16 @@ spec:
   containers:
   - name: python
     image: python:3.11-slim
+    command:
+    - sh
+    - -c
+    - "sleep 999999"
 """
     }
   }
 
   stages {
-    stage('Install dependencies') {
+    stage('Install deps') {
       steps {
         container('python') {
           sh 'pip install -r requirements.txt'

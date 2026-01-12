@@ -6,10 +6,16 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
+  - name: jnlp
+    image: jenkins/inbound-agent:latest
+    args:
+      - \$(JENKINS_SECRET)
+      - \$(JENKINS_NAME)
+
   - name: python
     image: python:3.11-slim
     command:
-    - cat
+      - cat
     tty: true
 """
     }

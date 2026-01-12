@@ -1,33 +1,30 @@
 pipeline {
   agent {
     kubernetes {
-      defaultContainer 'python'
       yaml """
 apiVersion: v1
 kind: Pod
+metadata:
+  labels:
+    component: ci
 spec:
   containers:
   - name: python
     image: python:3.11-slim
     command:
-    - sh
-    - -c
-    - "sleep infinity"
-"""
+    - cat
+    tty: true
+      """
     }
   }
-
-  stages {
-    stage('Install dependencies') {
-      steps {
+stages {
+  stage('Test python') {
+    steps {
+      container('python') {
         sh 'pip install -r requirements.txt'
-      }
-    }
-
-    stage('Run tests') {
-      steps {
-        sh 'python test_app.py'
+        sh 'python test.py'  # Ou test_app.py si renommé
       }
     }
   }
+}
 }

@@ -1,6 +1,7 @@
 pipeline {
   agent {
     kubernetes {
+      defaultContainer 'python'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -11,25 +12,21 @@ spec:
     command:
     - sh
     - -c
-    - "sleep 999999"
+    - "sleep infinity"
 """
     }
   }
 
   stages {
-    stage('Install deps') {
+    stage('Install dependencies') {
       steps {
-        container('python') {
-          sh 'pip install -r requirements.txt'
-        }
+        sh 'pip install -r requirements.txt'
       }
     }
 
     stage('Run tests') {
       steps {
-        container('python') {
-          sh 'python test_app.py'
-        }
+        sh 'python test_app.py'
       }
     }
   }

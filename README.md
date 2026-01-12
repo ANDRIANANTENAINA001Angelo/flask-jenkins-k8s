@@ -1,2 +1,3 @@
 # test webhook ok 
-# add poolscm per miniut
+# add poolscm per minite 
+# test pool

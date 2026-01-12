@@ -1,12 +1,13 @@
 pipeline {
-  agent {
-    kubernetes {
-      yaml """
+    agent {
+        kubernetes {
+            defaultContainer 'python'
+            yaml '''
 apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    component: ci
+    some-label: flask-ci
 spec:
   containers:
   - name: python
@@ -14,17 +15,20 @@ spec:
     command:
     - cat
     tty: true
-      """
+'''
+        }
     }
-  }
-stages {
-  stage('Test python') {
-    steps {
-      container('python') {
-        sh 'pip install -r requirements.txt'
-        sh 'python test_app.py'  
-      }
+
+    stages {
+        stage('Install dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+        stage('Run tests') {
+            steps {
+                sh 'python test_app.py'   
+            }
+        }
     }
-  }
-}
 }

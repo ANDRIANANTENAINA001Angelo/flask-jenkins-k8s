@@ -22,7 +22,7 @@ stages {
     steps {
       container('python') {
         sh 'pip install -r requirements.txt'
-        sh 'python test.py'  # Ou test_app.py si renommé
+        sh 'python test_app.py'  
       }
     }
   }

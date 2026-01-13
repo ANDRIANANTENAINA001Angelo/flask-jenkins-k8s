@@ -1,6 +1,7 @@
 pipeline {
   agent {
     kubernetes {
+      namespace 'jenkins'
       defaultContainer 'python'
       yaml '''
 apiVersion: v1
@@ -68,7 +69,7 @@ spec:
         container('docker') {
           sh '''
           docker tag localhost:4000/flask-app:latest registry.jenkins.svc.cluster.local:5000/flask-app:latest
-          docker push registry.jenkins.svc.cluster.local:5000/flask-app:latest
+          docker push registry:5000/flask-app:latest
           '''
         }
       }
@@ -78,8 +79,8 @@ spec:
       steps {
         container('kubectl') {
           sh '''
-          kubectl apply -f k8s
-          kubectl rollout status deployment/flask-app
+          kubectl apply -f k8s -n jenkins
+          kubectl rollout status deployment/flask-app -n jenkins
           '''
         }
       }

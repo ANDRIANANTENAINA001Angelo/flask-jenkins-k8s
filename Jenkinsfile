@@ -74,16 +74,6 @@ spec:
       }
     }
 
-    stage('Push Docker image') {
-      steps {
-        container('docker') {
-          sh '''
-          docker push localhost:4000/flask-app:latest
-          '''
-        }
-      }
-    }
-
     stage('Deploy to Kubernetes') {
       steps {
         container('kubectl') {

@@ -1,60 +1,97 @@
 pipeline {
-    agent {
-        kubernetes {
-            defaultContainer 'python'
-            yaml '''
+  agent {
+    kubernetes {
+      defaultContainer 'python'
+      yaml '''
 apiVersion: v1
 kind: Pod
 spec:
-  nodeSelector:
-    kubernetes.io/hostname: minikube
   containers:
   - name: python
     image: python:3.11-slim
     command:
+    - sh
+    - -c
     - cat
     tty: true
+
   - name: docker
-    image: docker:27-dind
-    securityContext:
-      privileged: true
+    image: docker:27
+    command:
+    - sh
+    - -c
+    - cat
+    tty: true
     volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-sock
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+
+  - name: kubectl
+    image: bitnami/kubectl:latest
+    command:
+    - sh
+    - -c
+    - cat
+    tty: true
+
   volumes:
   - name: docker-sock
     hostPath:
       path: /var/run/docker.sock
 '''
+    }
+  }
+
+  stages {
+
+    stage('Install dependencies') {
+      steps {
+        container('python') {
+          sh '''
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          '''
         }
+      }
     }
 
-    // triggers {
-    //     pollSCM('* * * * *')
-    // }
-
-    stages {
-        stage('Install dependencies') {
-            steps {
-                sh 'pip install -r requirements.txt'
-            }
+    stage('Run tests') {
+      steps {
+        container('python') {
+          sh 'python test_app.py'
         }
-
-        stage('Run tests') {
-            steps {
-                sh 'python test_app.py'   
-            }
-        }
-
-        stage('Build & Push Docker image') {
-            steps {
-                container('docker') {
-                    sh '''
-                    docker build -t localhost:4000/flask_hello:latest .
-                    docker push localhost:4000/flask_hello:latest
-                    '''
-                }
-            }
-        }
+      }
     }
+
+    stage('Build Docker image') {
+      steps {
+        container('docker') {
+          sh '''
+          docker build -t localhost:4000/flask-app:latest .
+          '''
+        }
+      }
+    }
+
+    stage('Push Docker image') {
+      steps {
+        container('docker') {
+          sh '''
+          docker push localhost:4000/flask-app:latest
+          '''
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
+        container('kubectl') {
+          sh '''
+          kubectl apply -f k8s
+          kubectl rollout status deployment/flask-app
+          '''
+        }
+      }
+    }
+  }
 }

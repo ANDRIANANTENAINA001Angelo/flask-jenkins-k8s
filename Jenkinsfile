@@ -64,7 +64,7 @@ spec:
     }
 
     stage('Push Docker image') {
-      steps {
+      steps { 
         container('docker') {
           sh '''
           docker tag localhost:4000/flask-app:latest registry.jenkins.svc.cluster.local:5000/flask-app:latest

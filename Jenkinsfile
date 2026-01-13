@@ -63,11 +63,12 @@ spec:
       }
     }
 
-    stage('Build Docker image') {
+    stage('Push Docker image') {
       steps {
         container('docker') {
           sh '''
-          docker build -t localhost:4000/flask-app:latest .
+          docker tag localhost:4000/flask-app:latest registry.jenkins.svc.cluster.local:5000/flask-app:latest
+          docker push registry.jenkins.svc.cluster.local:5000/flask-app:latest
           '''
         }
       }
